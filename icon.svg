@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <radialGradient id="darkGrad" cx="50%" cy="50%">
+      <stop offset="0%" style="stop-color:#2d2d2d;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0a0a0a;stop-opacity:1" />
+    </radialGradient>
+    <linearGradient id="skullGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#8b0000;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3d0000;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="50" cy="50" r="48" fill="url(#darkGrad)" stroke="#3d0000" stroke-width="3"/>
+  
+  <!-- Skull shape -->
+  <g filter="url(#glow)">
+    <!-- Skull cranium -->
+    <ellipse cx="50" cy="42" rx="20" ry="22" fill="url(#skullGrad)"/>
+    
+    <!-- Eye sockets -->
+    <ellipse cx="42" cy="38" rx="5" ry="7" fill="#000"/>
+    <ellipse cx="58" cy="38" rx="5" ry="7" fill="#000"/>
+    
+    <!-- Nasal cavity -->
+    <path d="M 47 48 L 50 52 L 53 48 Z" fill="#000"/>
+    
+    <!-- Jaw/teeth -->
+    <rect x="40" y="55" width="20" height="8" rx="2" fill="url(#skullGrad)"/>
+    <line x1="45" y1="55" x2="45" y2="63" stroke="#000" stroke-width="1"/>
+    <line x1="50" y1="55" x2="50" y2="63" stroke="#000" stroke-width="1"/>
+    <line x1="55" y1="55" x2="55" y2="63" stroke="#000" stroke-width="1"/>
+  </g>
+  
+  <!-- Glow effect -->
+  <circle cx="50" cy="50" r="48" fill="none" stroke="#8b0000" stroke-width="1" opacity="0.3"/>
+</svg>
