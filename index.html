@@ -280,18 +280,30 @@
         let darkPoints = 0;
 
         // Initialize Owlbear Rodeo SDK
-        OBR.onReady(async () => {
-            // Load saved dark points
-            const metadata = await OBR.room.getMetadata();
-            if (metadata['coriolis.darkPoints'] !== undefined) {
-                darkPoints = metadata['coriolis.darkPoints'];
-                updateDisplay();
-            }
+        if (window.OBR) {
+            OBR.onReady(async () => {
+                try {
+                    // Load saved dark points
+                    const metadata = await OBR.room.getMetadata();
+                    if (metadata['coriolis.darkPoints'] !== undefined) {
+                        darkPoints = metadata['coriolis.darkPoints'];
+                        updateDisplay();
+                    }
 
-            // Set the extension to a square size
-            await OBR.action.setHeight(420);
-            await OBR.action.setWidth(420);
-        });
+                    // Set the extension to a square size
+                    await OBR.action.setHeight(450);
+                    await OBR.action.setWidth(420);
+                } catch (error) {
+                    console.error('Error initializing OBR:', error);
+                    // Continue anyway, the UI will still work locally
+                    updateDisplay();
+                }
+            });
+        } else {
+            // If OBR is not available (testing locally), just show the UI
+            console.warn('OBR not available, running in standalone mode');
+            updateDisplay();
+        }
 
         async function saveDarkPoints() {
             if (window.OBR) {
