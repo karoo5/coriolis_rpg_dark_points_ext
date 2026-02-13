@@ -1,13 +1,16 @@
+Manifest · JSON
 {
-  "name": "Coriolis - Dark Points Tracker",
-  "version": "1.0.1",
+  "name": "Dark Points",
+  "version": "1.0.2",
   "manifest_version": 1,
-  "description": "Tieni traccia dei Dark Points per Coriolis: The Third Horizon con gettoni 3D animati",
+  "description": "Tracker per Dark Points di Coriolis",
   "author": "Custom Extension",
   "icon": "https://karoo5.github.io/coriolis_rpg_dark_points_ext/icon.svg",
   "action": {
     "title": "Dark Points",
     "icon": "https://karoo5.github.io/coriolis_rpg_dark_points_ext/icon.svg",
-    "popover": "https://karoo5.github.io/coriolis_rpg_dark_points_ext/index.html"
+    "popover": "https://karoo5.github.io/coriolis_rpg_dark_points_ext/index.html",
+    "height": 480,
+    "width": 420
   }
 }
