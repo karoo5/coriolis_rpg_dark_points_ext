@@ -4,10 +4,10 @@
   "manifest_version": 1,
   "description": "Tieni traccia dei Dark Points per Coriolis: The Third Horizon con gettoni 3D animati",
   "author": "Custom Extension",
-  "icon": "icon.svg",
+  "icon": "/icon.svg",
   "action": {
     "title": "Dark Points",
-    "icon": "icon.svg",
-    "popover": "index.html"
+    "icon": "/icon.svg",
+    "popover": "/index.html"
   }
 }
