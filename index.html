@@ -289,10 +289,6 @@
                         darkPoints = metadata['coriolis.darkPoints'];
                         updateDisplay();
                     }
-
-                    // Set the extension to a square size
-                    await OBR.action.setHeight(450);
-                    await OBR.action.setWidth(420);
                 } catch (error) {
                     console.error('Error initializing OBR:', error);
                     // Continue anyway, the UI will still work locally
@@ -329,6 +325,8 @@
             }
         }
 
+        let currentTokenCount = 0; // Track how many tokens are currently displayed
+
         function updateDisplay() {
             const countElement = document.getElementById('dpCount');
             const tokenStack = document.getElementById('tokenStack');
@@ -344,47 +342,88 @@
             // Update remove button state
             removeBtn.disabled = darkPoints === 0;
 
-            // Clear existing tokens
-            tokenStack.innerHTML = '';
+            const maxVisibleTokens = Math.min(darkPoints, 12);
 
-            // Create randomly scattered tokens
-            const maxVisibleTokens = Math.min(darkPoints, 12); // Limit visual tokens
-
-            for (let i = 0; i < maxVisibleTokens; i++) {
-                const token = document.createElement('div');
-                token.className = 'token-3d';
+            // If we need to add tokens
+            if (maxVisibleTokens > currentTokenCount) {
+                for (let i = currentTokenCount; i < maxVisibleTokens; i++) {
+                    addToken(i, tokenStack);
+                }
+            }
+            // If we need to remove tokens
+            else if (maxVisibleTokens < currentTokenCount) {
+                const tokensToRemove = currentTokenCount - maxVisibleTokens;
+                const allTokens = Array.from(tokenStack.querySelectorAll('.token-3d'));
                 
-                // Random position within the container
-                const angle = Math.random() * Math.PI * 2;
-                const radius = Math.random() * 60; // radius from center
-                const x = 65 + Math.cos(angle) * radius; // 65 = half of 130px container width
-                const y = 65 + Math.sin(angle) * radius;
-                
-                token.style.left = `${x}px`;
-                token.style.top = `${y}px`;
-                token.style.transform = `rotate(${Math.random() * 360}deg)`;
-                token.style.zIndex = i;
-                
-                // Add glow to some random tokens
-                const tokenFaceClass = (Math.random() > 0.7) ? 'token-face token-glow' : 'token-face';
-                
-                token.innerHTML = `<div class="${tokenFaceClass}"></div>`;
-                
-                // Animate token entrance
-                token.style.opacity = '0';
-                token.style.transform += ' scale(0)';
-                setTimeout(() => {
-                    token.style.transition = 'all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
-                    token.style.opacity = '1';
-                    token.style.transform = token.style.transform.replace('scale(0)', 'scale(1)');
-                }, i * 40);
-                
-                tokenStack.appendChild(token);
+                for (let i = 0; i < tokensToRemove; i++) {
+                    if (allTokens.length > 0) {
+                        const tokenToRemove = allTokens.pop(); // Remove last token
+                        removeToken(tokenToRemove);
+                    }
+                }
             }
 
-            // If we have more tokens than visible, show indicator
-            if (darkPoints > maxVisibleTokens) {
+            currentTokenCount = maxVisibleTokens;
+
+            // Update overflow indicator
+            updateOverflowIndicator(tokenStack, darkPoints, maxVisibleTokens);
+        }
+
+        function addToken(index, container) {
+            const token = document.createElement('div');
+            token.className = 'token-3d';
+            
+            // Random position within the container
+            const angle = Math.random() * Math.PI * 2;
+            const radius = Math.random() * 60;
+            const x = 65 + Math.cos(angle) * radius;
+            const y = 65 + Math.sin(angle) * radius;
+            
+            token.style.left = `${x}px`;
+            token.style.top = `${y}px`;
+            token.style.transform = `rotate(${Math.random() * 360}deg) scale(0)`;
+            token.style.zIndex = index;
+            token.style.opacity = '0';
+            
+            const tokenFaceClass = (Math.random() > 0.7) ? 'token-face token-glow' : 'token-face';
+            token.innerHTML = `<div class="${tokenFaceClass}"></div>`;
+            
+            container.appendChild(token);
+            
+            // Animate entrance with a nice pop effect
+            setTimeout(() => {
+                token.style.transition = 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                token.style.opacity = '1';
+                const currentRotation = token.style.transform.match(/rotate\(([^)]+)\)/)[1];
+                token.style.transform = `rotate(${currentRotation}) scale(1)`;
+            }, 50);
+        }
+
+        function removeToken(token) {
+            // Animate exit with shrink and fade
+            token.style.transition = 'all 0.4s cubic-bezier(0.55, 0.085, 0.68, 0.53)';
+            token.style.opacity = '0';
+            token.style.transform = token.style.transform.replace(/scale\([^)]*\)/, 'scale(0)');
+            
+            // Remove from DOM after animation
+            setTimeout(() => {
+                if (token.parentNode) {
+                    token.parentNode.removeChild(token);
+                }
+            }, 400);
+        }
+
+        function updateOverflowIndicator(container, total, visible) {
+            // Remove old indicator
+            const oldIndicator = container.querySelector('.overflow-indicator');
+            if (oldIndicator) {
+                oldIndicator.remove();
+            }
+
+            // Add new indicator if needed
+            if (total > visible) {
                 const overflow = document.createElement('div');
+                overflow.className = 'overflow-indicator';
                 overflow.style.position = 'absolute';
                 overflow.style.top = '5px';
                 overflow.style.right = '5px';
@@ -392,8 +431,8 @@
                 overflow.style.fontSize = '0.7rem';
                 overflow.style.textShadow = '0 0 10px rgba(139, 0, 0, 0.8)';
                 overflow.style.fontWeight = 'bold';
-                overflow.textContent = `+${darkPoints - maxVisibleTokens}`;
-                tokenStack.appendChild(overflow);
+                overflow.textContent = `+${total - visible}`;
+                container.appendChild(overflow);
             }
         }
 
