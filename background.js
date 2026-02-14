@@ -1,0 +1,143 @@
+// Dark Points Tracker - Creates a scene item visible to all
+const ITEM_ID = "coriolis.dark-points-tracker";
+const METADATA_KEY = "coriolis.darkPoints";
+
+OBR.onReady(async () => {
+    // Initialize the tracker on the scene
+    await initializeTracker();
+    
+    // Listen for changes to update the display
+    OBR.room.onMetadataChange(async (metadata) => {
+        if (metadata[METADATA_KEY] !== undefined) {
+            await updateTrackerDisplay(metadata[METADATA_KEY]);
+        }
+    });
+    
+    // Set up GM controls
+    const role = await OBR.player.getRole();
+    if (role === "GM") {
+        await setupGMInteraction();
+    }
+});
+
+async function initializeTracker() {
+    const metadata = await OBR.room.getMetadata();
+    const darkPoints = metadata[METADATA_KEY] || 0;
+    
+    const existing = await OBR.scene.items.getItems((item) => item.id === ITEM_ID);
+    
+    if (existing.length === 0) {
+        // Create the tracker item
+        const role = await OBR.player.getRole();
+        const isGM = role === "GM";
+        
+        await OBR.scene.items.addItems([{
+            id: ITEM_ID,
+            type: "LABEL",
+            position: { x: 300, y: 100 },
+            scale: { x: 1, y: 1 },
+            rotation: 0,
+            layer: "DRAWING",
+            locked: !isGM,
+            visible: true,
+            disableHit: !isGM,
+            text: {
+                type: "RICH",
+                richText: [
+                    { type: "paragraph", children: [
+                        { text: "DARK POINTS", bold: false, fontSize: 18, color: "#8b0000" }
+                    ]},
+                    { type: "paragraph", children: [
+                        { text: darkPoints.toString(), bold: true, fontSize: 72, color: "#000000" }
+                    ]}
+                ],
+                style: {
+                    fillColor: "#000000",
+                    fillOpacity: 1,
+                    strokeColor: "#8b0000",
+                    strokeOpacity: 1,
+                    strokeWidth: 2,
+                    padding: 16,
+                    textAlign: "CENTER"
+                }
+            },
+            style: {
+                backgroundColor: "#000000",
+                backgroundOpacity: 0.95,
+                borderColor: "#8b0000",
+                borderOpacity: 1,
+                borderWidth: 4,
+                borderRadius: 12
+            },
+            metadata: {
+                [METADATA_KEY]: darkPoints
+            }
+        }]);
+    } else {
+        await updateTrackerDisplay(darkPoints);
+    }
+}
+
+async function updateTrackerDisplay(darkPoints) {
+    try {
+        await OBR.scene.items.updateItems(
+            (item) => item.id === ITEM_ID,
+            (items) => {
+                for (const item of items) {
+                    if (item.text && item.text.richText) {
+                        item.text.richText[1].children[0].text = darkPoints.toString();
+                    }
+                    item.metadata[METADATA_KEY] = darkPoints;
+                }
+            }
+        );
+    } catch (error) {
+        console.error("Error updating tracker:", error);
+    }
+}
+
+async function setupGMInteraction() {
+    // Context menu to add dark points
+    await OBR.contextMenu.create({
+        id: `${ITEM_ID}.add`,
+        icons: [{
+            icon: "https://karoo5.github.io/coriolis_rpg_dark_points_ext/icon.svg",
+            label: "+1 Dark Point",
+            filter: {
+                every: [
+                    { key: "id", value: ITEM_ID, operator: "=="}
+                ]
+            }
+        }],
+        onClick(context) {
+            modifyDarkPoints(1);
+        }
+    });
+    
+    // Context menu to remove dark points
+    await OBR.contextMenu.create({
+        id: `${ITEM_ID}.remove`,
+        icons: [{
+            icon: "https://karoo5.github.io/coriolis_rpg_dark_points_ext/icon.svg",
+            label: "-1 Dark Point",
+            filter: {
+                every: [
+                    { key: "id", value: ITEM_ID, operator: "==" }
+                ]
+            }
+        }],
+        onClick(context) {
+            modifyDarkPoints(-1);
+        }
+    });
+}
+
+async function modifyDarkPoints(delta) {
+    const metadata = await OBR.room.getMetadata();
+    const current = metadata[METADATA_KEY] || 0;
+    const newValue = Math.max(0, current + delta);
+    
+    await OBR.room.setMetadata({
+        [METADATA_KEY]: newValue
+    });
+}

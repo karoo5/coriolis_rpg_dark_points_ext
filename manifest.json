@@ -1,15 +1,9 @@
 {
   "name": "Dark Points",
-  "version": "1.1.1",
+  "version": "2.0.0",
   "manifest_version": 1,
-  "description": "Tracker per Dark Points di Coriolis",
+  "description": "Tracker per Dark Points di Coriolis - Visibile a tutti",
   "author": "Custom Extension",
   "icon": "https://karoo5.github.io/coriolis_rpg_dark_points_ext/icon.svg",
-  "action": {
-    "title": "Dark Points",
-    "icon": "https://karoo5.github.io/coriolis_rpg_dark_points_ext/icon.svg",
-    "popover": "https://karoo5.github.io/coriolis_rpg_dark_points_ext/index.html",
-    "height": 480,
-    "width": 420
-  }
+  "background_url": "https://karoo5.github.io/coriolis_rpg_dark_points_ext/background.html"
 }
